@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  weight    Float?
+  goal      String?
+  createdAt DateTime @default(now())
+  workoutLogs WorkoutLog[]
+}
+
+model Exercise {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?  @db.Text
+  mediaUrl    String?
+  muscleGroup String?
+  routineExercises RoutineExercise[]
+  logEntries       WorkoutLogEntry[]
+}
+
+model Routine {
+  id          Int      @id @default(autoincrement())
+  name        String
+  level       String
+  objective   String
+  exercises   RoutineExercise[]
+}
+
+model RoutineExercise {
+  id         Int      @id @default(autoincrement())
+  routineId  Int
+  exerciseId Int
+  sets       Int
+  reps       String
+  routine    Routine  @relation(fields: [routineId], references: [id])
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+}
+
+model WorkoutLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  date      DateTime @default(now())
+  completed Boolean  @default(false)
+  notes     String?
+  user      User     @relation(fields: [userId], references: [id])
+  entries   WorkoutLogEntry[]
+}
+
+model WorkoutLogEntry {
+  id           Int        @id @default(autoincrement())
+  workoutLogId Int
+  exerciseId   Int
+  setNumber    Int
+  weight       Float
+  reps         Int
+  workoutLog   WorkoutLog @relation(fields: [workoutLogId], references: [id])
+  exercise     Exercise   @relation(fields: [exerciseId], references: [id])
+}
+
+model Recipe {
+  id           Int      @id @default(autoincrement())
+  title        String
+  instructions String   @db.Text
+  prepTime     Int
+  type         String
+  imageUrl     String?
+  calories     Int
+  protein      Float
+  carbs        Float
+  fat          Float
+  ingredients  Ingredient[] 
+}
+
+model Ingredient {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  recipes Recipe[]
+}
