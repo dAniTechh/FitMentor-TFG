@@ -12,10 +12,12 @@ model User {
   email     String   @unique
   password  String
   name      String?
-  weight    Float?
-  goal      String?
+  age       Int?      // Añadimos esto
+  weight    Float?    // Añadimos esto
+  height    Float?    // Añadimos esto
+  goal      String?   // Añadimos esto
   createdAt DateTime @default(now())
-  workoutLogs WorkoutLog[]
+  routines  Routine[]
 }
 
 model Exercise {

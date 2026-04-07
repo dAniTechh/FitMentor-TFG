@@ -4,7 +4,7 @@ import axios from 'axios';
 // Importamos iconos
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 
-const API_URL = 'http://localhost:3000/routines';
+const API_URL = 'http://192.168.178.73:3000/routines';
 
 // Paleta de colores minimalista
 const COLORS = {
