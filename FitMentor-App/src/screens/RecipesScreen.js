@@ -6,7 +6,6 @@ import {
 import axios from 'axios';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-// IMPORTANTE: Asegúrate de que esta IP sea la de tu PC actual
 const API_URL = 'http://192.168.178.73:3000/recipes';
 
 const COLORS = {
@@ -24,7 +23,8 @@ const COLORS = {
 
 const CATEGORIES = ['Todas', 'Alta Proteína', 'Bajo Carb', 'Desayuno', 'Comida', 'Cena'];
 
-export default function RecipesScreen({ token }) {
+// Se eliminó el prop { token }
+export default function RecipesScreen() {
   const [recipes, setRecipes] = useState([]);
   const [activeCat, setActiveCat] = useState('Todas');
   const [text, setText] = useState('');
@@ -35,20 +35,12 @@ export default function RecipesScreen({ token }) {
   const fetchRecipes = async (ing = '') => {
     setLoading(true);
     try {
-      // ENVIAMOS EL TOKEN PARA PASAR EL MIDDLEWARE DEL BACKEND
-      const res = await axios.get(ing ? `${API_URL}?ingredient=${ing}` : API_URL, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      // Petición limpia sin headers de autorización
+      const res = await axios.get(ing ? `${API_URL}?ingredient=${ing}` : API_URL);
       setRecipes(res.data);
     } catch (error) {
       console.error("Error al obtener recetas:", error);
-      if (error.response?.status === 401) {
-        Alert.alert("Sesión expirada", "Por favor, vuelve a iniciar sesión.");
-      } else {
-        Alert.alert("Error", "No se pudo conectar con el servidor.");
-      }
+      Alert.alert("Error", "No se pudo conectar con el servidor.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -56,17 +48,15 @@ export default function RecipesScreen({ token }) {
   };
 
   useEffect(() => { 
-    if (token) fetchRecipes(); 
-  }, [token]);
+    // Se ejecuta directamente al cargar la pantalla
+    fetchRecipes(); 
+  }, []);
 
-  // FILTRADO INTELIGENTE: Busca por texto, categorías especiales o tipo de comida
   const filteredRecipes = useMemo(() => {
     let result = recipes;
-
     if (text) {
       result = result.filter(r => r.title.toLowerCase().includes(text.toLowerCase()));
     }
-
     if (activeCat === 'Todas') return result;
     if (activeCat === 'Alta Proteína') return result.filter(r => r.protein >= 30);
     if (activeCat === 'Bajo Carb') return result.filter(r => (r.carbs || 0) < 15);
@@ -75,7 +65,7 @@ export default function RecipesScreen({ token }) {
   }, [recipes, activeCat, text]);
 
   const addToShoppingList = (recipe) => {
-    Alert.alert("Lista de la Compra", `Ingredientes de "${recipe.title}" añadidos correctamente.`);
+    Alert.alert("Lista de la Compra", `Ingredientes de "${recipe.title}" añadidos.`);
   };
 
   const renderHeader = () => (
@@ -90,19 +80,17 @@ export default function RecipesScreen({ token }) {
         </TouchableOpacity>
       </View>
 
-      {/* DASHBOARD DE MACROS */}
       <View style={styles.macroCard}>
         <Text style={styles.macroTitle}>Progreso Diario</Text>
         <View style={styles.progressBarBg}>
           <View style={[styles.progressBarFill, { width: '65%' }]} /> 
         </View>
-        <View style={styles.macroStatsRow}>
+        <div style={styles.macroStatsRow}>
           <Text style={styles.macroStatText}>1,450 / 2,200 kcal</Text>
           <Text style={styles.macroStatText}>Faltan: 750 kcal</Text>
-        </View>
+        </div>
       </View>
 
-      {/* BARRA DE BÚSQUEDA */}
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color={COLORS.textSub} style={styles.searchIcon} />
         <TextInput 
@@ -113,7 +101,6 @@ export default function RecipesScreen({ token }) {
         />
       </View>
 
-      {/* CATEGORÍAS */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
         {CATEGORIES.map(cat => (
           <TouchableOpacity 
@@ -198,20 +185,17 @@ export default function RecipesScreen({ token }) {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>{selectedRecipe?.title}</Text>
               <Text style={styles.modalSubtitle}>{selectedRecipe?.type} • {selectedRecipe?.calories} kcal</Text>
-              
               <View style={styles.sectionDivider} />
-              
               <Text style={styles.sectionTitle}>Ingredientes</Text>
               {selectedRecipe?.ingredients?.length > 0 ? (
                 selectedRecipe.ingredients.map((ing, idx) => (
                   <Text key={idx} style={styles.modalText}>• {ing.name}</Text>
                 ))
               ) : (
-                <Text style={styles.modalText}>Lista de ingredientes no disponible.</Text>
+                <Text style={styles.modalText}>Lista no disponible.</Text>
               )}
-
               <Text style={[styles.sectionTitle, { marginTop: 25 }]}>Instrucciones</Text>
-              <Text style={styles.modalText}>{selectedRecipe?.instructions || "Sin instrucciones detalladas."}</Text>
+              <Text style={styles.modalText}>{selectedRecipe?.instructions || "Sin instrucciones."}</Text>
             </View>
           </ScrollView>
         </SafeAreaView>
