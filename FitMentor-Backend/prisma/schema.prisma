@@ -8,34 +8,37 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  age       Int?      // Añadimos esto
-  weight    Float?    // Añadimos esto
-  height    Float?    // Añadimos esto
-  goal      String?   // Añadimos esto
-  createdAt DateTime @default(now())
-  routines  Routine[]
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  password    String
+  name        String?
+  age         Int?      
+  weight      Float?    
+  height      Float?    
+  goal        String?   
+  createdAt   DateTime     @default(now())
+  routines    Routine[]
+  workoutLogs WorkoutLog[]
 }
 
 model Exercise {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?  @db.Text
-  mediaUrl    String?
-  muscleGroup String?
+  id               Int               @id @default(autoincrement())
+  name             String
+  description      String?           @db.Text
+  mediaUrl         String?
+  muscleGroup      String?
   routineExercises RoutineExercise[]
   logEntries       WorkoutLogEntry[]
 }
 
 model Routine {
-  id          Int      @id @default(autoincrement())
+  id          Int               @id @default(autoincrement())
+  userId      Int               // <-- AÑADIDO: ID del usuario creador
   name        String
   level       String
   objective   String
   exercises   RoutineExercise[]
+  user        User              @relation(fields: [userId], references: [id]) // <-- AÑADIDO: Relación inversa
 }
 
 model RoutineExercise {
@@ -49,12 +52,12 @@ model RoutineExercise {
 }
 
 model WorkoutLog {
-  id        Int      @id @default(autoincrement())
+  id        Int               @id @default(autoincrement())
   userId    Int
-  date      DateTime @default(now())
-  completed Boolean  @default(false)
+  date      DateTime          @default(now())
+  completed Boolean           @default(false)
   notes     String?
-  user      User     @relation(fields: [userId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
   entries   WorkoutLogEntry[]
 }
 
@@ -70,9 +73,9 @@ model WorkoutLogEntry {
 }
 
 model Recipe {
-  id           Int      @id @default(autoincrement())
+  id           Int          @id @default(autoincrement())
   title        String
-  instructions String   @db.Text
+  instructions String       @db.Text
   prepTime     Int
   type         String
   imageUrl     String?
